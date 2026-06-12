@@ -10,21 +10,99 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Mobile nav toggle
+  // Mobile nav toggle with improved accessibility and iOS scroll lock
   const toggle = document.getElementById('nav-toggle');
   const mobileMenu = document.getElementById('mobile-menu');
+
   if (toggle && mobileMenu) {
+    let scrollPosition = 0;
+
+    const openMenu = () => {
+      // Save scroll position
+      scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+
+      // Lock body scroll (works on iOS)
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollPosition}px`;
+      document.body.style.width = '100%';
+
+      // Update classes and ARIA
+      toggle.classList.add('open');
+      mobileMenu.classList.add('open');
+      toggle.setAttribute('aria-expanded', 'true');
+
+      // Focus first menu item
+      const firstLink = mobileMenu.querySelector('a');
+      if (firstLink) {
+        setTimeout(() => firstLink.focus(), 100);
+      }
+    };
+
+    const closeMenu = () => {
+      // Unlock body scroll
+      document.body.style.removeProperty('overflow');
+      document.body.style.removeProperty('position');
+      document.body.style.removeProperty('top');
+      document.body.style.removeProperty('width');
+
+      // Restore scroll position
+      window.scrollTo(0, scrollPosition);
+
+      // Update classes and ARIA
+      toggle.classList.remove('open');
+      mobileMenu.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+
+      // Return focus to toggle button
+      toggle.focus();
+    };
+
+    // Toggle button click
     toggle.addEventListener('click', () => {
-      toggle.classList.toggle('open');
-      mobileMenu.classList.toggle('open');
-      document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+      const isOpen = toggle.classList.contains('open');
+      if (isOpen) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
     });
+
+    // Close menu when clicking links
     mobileMenu.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
-        toggle.classList.remove('open');
-        mobileMenu.classList.remove('open');
-        document.body.style.overflow = '';
+        closeMenu();
       });
+    });
+
+    // Close menu on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && toggle.classList.contains('open')) {
+        closeMenu();
+      }
+    });
+
+    // Trap focus within mobile menu when open
+    const focusableElements = mobileMenu.querySelectorAll('a, button');
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+
+    mobileMenu.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab' && toggle.classList.contains('open')) {
+        if (e.shiftKey) {
+          // Shift + Tab
+          if (document.activeElement === firstFocusable) {
+            e.preventDefault();
+            lastFocusable.focus();
+          }
+        } else {
+          // Tab
+          if (document.activeElement === lastFocusable) {
+            e.preventDefault();
+            firstFocusable.focus();
+          }
+        }
+      }
     });
   }
 
@@ -41,9 +119,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   reveals.forEach(el => revealObserver.observe(el));
 
-  // Active nav link
+  // Active nav link (desktop and mobile)
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+
+  // Set active class for desktop nav links
   document.querySelectorAll('.nav-links a').forEach(link => {
+    const href = link.getAttribute('href');
+    if (href === currentPage || (currentPage === '' && href === 'index.html')) {
+      link.classList.add('active');
+    }
+  });
+
+  // Set active class for mobile menu links (exclude buttons)
+  document.querySelectorAll('.mobile-menu a:not(.btn)').forEach(link => {
     const href = link.getAttribute('href');
     if (href === currentPage || (currentPage === '' && href === 'index.html')) {
       link.classList.add('active');
