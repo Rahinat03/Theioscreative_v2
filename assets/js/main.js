@@ -131,7 +131,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Set active class for mobile menu links (exclude buttons)
-  document.querySelectorAll('.mobile-menu a:not(.btn)').forEach(link => {
+  document.querySelectorAll('.mobile-menu a').forEach(link => {
+    // Skip if this is a button
+    if (link.classList.contains('btn')) return;
+
     const href = link.getAttribute('href');
     if (href === currentPage || (currentPage === '' && href === 'index.html')) {
       link.classList.add('active');
