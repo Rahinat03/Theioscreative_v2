@@ -122,23 +122,38 @@ document.addEventListener('DOMContentLoaded', () => {
   // Active nav link (desktop and mobile)
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
-  // Set active class for desktop nav links
-  document.querySelectorAll('.nav-links a').forEach(link => {
+  // Set active class for desktop nav links (including regular links)
+  document.querySelectorAll('.nav-links a:not(.btn)').forEach(link => {
     const href = link.getAttribute('href');
     if (href === currentPage || (currentPage === '' && href === 'index.html')) {
       link.classList.add('active');
     }
   });
 
-  // Set active class for mobile menu links (exclude buttons)
-  document.querySelectorAll('.mobile-menu a').forEach(link => {
-    // Skip if this is a button
-    if (link.classList.contains('btn')) return;
+  // Set active class for desktop "Get Started" button (nav-cta)
+  const desktopCtaButton = document.querySelector('.nav-cta');
+  if (desktopCtaButton) {
+    const href = desktopCtaButton.getAttribute('href');
+    if (href === currentPage || (currentPage === 'contact.html' && href === 'contact.html')) {
+      desktopCtaButton.classList.add('active');
+    }
+  }
 
+  // Set active class for mobile menu links (exclude buttons initially)
+  document.querySelectorAll('.mobile-menu a:not(.btn)').forEach(link => {
     const href = link.getAttribute('href');
     if (href === currentPage || (currentPage === '' && href === 'index.html')) {
       link.classList.add('active');
     }
   });
+
+  // Set active class for mobile "Get Started" button
+  const mobileCtaButton = document.querySelector('.mobile-menu .btn');
+  if (mobileCtaButton) {
+    const href = mobileCtaButton.getAttribute('href');
+    if (href === currentPage || (currentPage === 'contact.html' && href === 'contact.html')) {
+      mobileCtaButton.classList.add('active');
+    }
+  }
 
 });
